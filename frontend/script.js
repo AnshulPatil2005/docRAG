@@ -1,12 +1,18 @@
 // LocalStorage key for recent tasks
 const STORAGE_KEY = 'rag_recent_tasks';
 
+// Default API URL (Render server)
+const DEFAULT_API_URL = 'https://docrag-2gvg.onrender.com';
+
+// Keep-alive interval (14 minutes - Render sleeps after 15 min of inactivity)
+const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     checkHealth();
     loadRecentTasks();
 
-    // Load saved API URL
+    // Load saved API URL or use default
     const savedUrl = localStorage.getItem('apiUrl');
     if (savedUrl) {
         document.getElementById('apiUrl').value = savedUrl;
@@ -20,7 +26,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check health every 30 seconds
     setInterval(checkHealth, 30000);
+
+    // Keep-alive ping every 14 minutes to prevent Render from sleeping
+    startKeepAlive();
 });
+
+// Keep-alive function to prevent Render server from sleeping
+function startKeepAlive() {
+    async function ping() {
+        const apiUrl = getApiUrl();
+        try {
+            await fetch(`${apiUrl}/api/v1/health`, { method: 'GET' });
+            console.log(`[Keep-alive] Pinged server at ${new Date().toLocaleTimeString()}`);
+        } catch (error) {
+            console.log(`[Keep-alive] Ping failed: ${error.message}`);
+        }
+    }
+
+    // Ping immediately on load
+    ping();
+
+    // Then ping every 14 minutes
+    setInterval(ping, KEEP_ALIVE_INTERVAL);
+}
 
 function getApiUrl() {
     return document.getElementById('apiUrl').value.replace(/\/$/, '');
