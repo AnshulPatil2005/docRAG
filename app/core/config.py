@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     # Qdrant
     QDRANT_URL: str = "http://qdrant:6333"
+    QDRANT_API_KEY: Optional[str] = None
     QDRANT_COLLECTION_NAME: str = "documents"
 
     # LLM

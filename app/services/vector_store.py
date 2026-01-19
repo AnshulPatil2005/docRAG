@@ -11,7 +11,10 @@ _client = None
 def get_client():
     global _client
     if _client is None:
-        _client = QdrantClient(url=settings.QDRANT_URL)
+        _client = QdrantClient(
+            url=settings.QDRANT_URL,
+            api_key=settings.QDRANT_API_KEY
+        )
     return _client
 
 def init_collection():
